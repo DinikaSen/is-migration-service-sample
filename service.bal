@@ -86,6 +86,8 @@ service / on new http:Listener(9090) {
             pushToContext(contextId, context);
 
         } on fail error err {
+            log:printInfo(string `${contextId}: External authentication failed.`);
+            log:printInfo(err.message());
             if err.message() == "Invalid credentials" {
                 log:printInfo(string `${contextId}: Invalid credentials provided for the user: ${user.id}.`);
 
@@ -154,9 +156,10 @@ service / on new http:Listener(9090) {
         } else {
             log:printInfo(string `Authentication status not found for the context id: ${contextId}.`);
 
-            return <http:BadRequest>{
+            return <http:Ok>{
                 body: {
-                    message: "Invalid context id"
+                    status: "FAIL",
+                    message: "Invalid request"
                 }
             };
         }
