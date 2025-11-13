@@ -57,7 +57,7 @@ service / on new http:Listener(9090) {
 
         string contextId = uuid:createType1AsString();
 
-        log:printInfo(string `${contextId}: Received authentication request for the user: ${user.id}.`);
+        log:printInfo(string `${contextId}: Received authentication request for the user: ${user.id}, username: ${user.username}.`);
 
         do {
             // Create future to authenticate user with the external IDP.
@@ -86,9 +86,8 @@ service / on new http:Listener(9090) {
             pushToContext(contextId, context);
 
         } on fail error err {
-            log:printInfo(string `${contextId}: External authentication failed.`);
-            log:printInfo(err.message());
             if err.message() == "Invalid credentials" {
+                log:printInfo(string `${contextId}: External authentication failed due to invalid credentials..`);
                 log:printInfo(string `${contextId}: Invalid credentials provided for the user: ${user.id}.`);
 
                 AuthenticationContext context = {
@@ -156,10 +155,9 @@ service / on new http:Listener(9090) {
         } else {
             log:printInfo(string `Authentication status not found for the context id: ${contextId}.`);
 
-            return <http:Ok>{
+            return <http:BadRequest>{
                 body: {
-                    status: "FAIL",
-                    message: "Invalid request"
+                    message: "Invalid context id"
                 }
             };
         }
